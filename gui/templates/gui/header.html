@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Handwriting recognition</title>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		{% load staticfiles %}
+		<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
+		<link rel="stylesheet" href="{% static 'css/bootstrap-table.min.css' %}" type="text/css">
+		<meta name="viewport" content="width = device-width, initial-scale = 1">
+		<style>
+		html, body{
+		  height: 100%;
+		}
+		</style>
+	</head>
+	<body>
+		<div style="display: flex; flex-direction: column; height: 100%;">
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark"">
+			  <a class="navbar-brand" href="{% url request.resolver_match.url_name %}">Handwriting recognition</a>
+			</nav>
+			<div class="container-fluid" style="flex: 1;">
+				<div class="row h-100">
+					<div class="bg-dark col-lg-2 col-md-3 col-sm-4 col-xs-12">
+						<div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="margin-top: 25px;">
+						  <a class="nav-link {% if request.resolver_match.url_name == 'download' %}active{% endif %}" href="{% url 'download' %}">Download document</a>
+						  <a class="nav-link {% if request.resolver_match.url_name == 'read' %}active{% endif %}" href="{% url 'read' %}">Read document</a>
+						  <!--
+						  <hr>
+						  <a class="nav-link {{ active_label.2 }}" id="v-pills-ai-train-tab" data-toggle="pill" href="#v-pills-ai-train" role="tab" aria-controls="v-pills-ai-train" aria-selected="false">Train CNN</a>
+						  <a class="nav-link {{ active_label.3 }}" id="v-pills-ai-info-tab" data-toggle="pill" href="#v-pills-ai-info" role="tab" aria-controls="v-pills-ai-info" aria-selected="false">Show info</a>
+						  -->
+						</div>
+					</div>
+					
+					<div class="col-lg-10 col-md-9 col-sm-8 col-xs-12" style="background-color: #F0F1F2;">
+						  {% block content %}
+						  {% endblock %}
+						  <!--
+						  <div class="tab-pane fade {{ active_tab.2 }}" id="v-pills-ai-train" role="tabpanel" aria-labelledby="v-pills-ai-train-tab">
+							<div class="container">
+								<form id="train" style="width: 100%" method="POST" action="">{% csrf_token %}
+									<div class="form-check form-check-inline" style="padding-top: 10%; width: 100%;">
+										<label for="epochs">Number of training cycles:</label>
+										<input id="epochs" name="epochs" type="number" class="form-control" placeholder="Enter number" style="margin-left: 25px; margin-right: 25px; max-width: 150px;">
+										<button type="submit" class="btn btn-primary">Train</button>
+									</div>
+								</form>
+								<hr>
+								<textarea id="train_console" cols="100" rows="20" style="width:100%; resize: none;" readonly></textarea>
+							</div>
+						  </div>
+						  <div class="tab-pane fade {{ active_tab.3 }}" id="v-pills-ai-info" role="tabpanel" aria-labelledby="v-pills-ai-info-tab">E</div>
+						  -->
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+		<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>	
+		<script src="{% static 'js/bootstrap-table.min.js' %}"></script>	
+		<script type="text/javascript">
+			{% if read_data %}
+				var data = {{ read_data|safe }};
+				
+				$( document ).ready(function() {
+					$('body').on('click', function(event){
+						if($(event.target).closest('.popover').length != 0) return true;
+						$('.popover').popover('dispose');
+					});
+				});
+				
+				showPopover = function(event, x, y)
+				{
+					var id = "#read_" + x + "_" + y;
+					var content = "<div class=\"row\" style=\"margin: 5px;\"><img src=\"data:image/jpg;base64," + data[x][y][1] + "\" style=\"height: 56px;\"><div>";
+					
+					for(var i = 0; i < data[x][y][0].length; i++)
+					{
+						pred = data[x][y][0][i];
+						content += "<div class=\"form-check\"><input  class=\"form-check-input\" type=\"radio\" name=\"pred\" value=\"" + pred[0] + "\" onchange=\"$('" + id + "').html(this.value);\" ";
+						
+						if($(id).html() == pred[0])
+						{
+							content += "checked";
+						}
+						content += ">" + pred[0] + " (" + pred[1] + ")</input></div>";
+					}
+					content += "</div></div>";
+					
+					$('.popover').popover('dispose');
+					$(id).popover(
+						{'content': content,
+							'html': true,
+							'trigger': 'click',
+							'placement': 'top'});
+					$(id).popover('show');
+					
+					event = event || window.event;
+					event.stopImmediatePropagation();
+				}
+				
+				{% if class_acc %}
+					var classAccuracy = {{ class_acc|safe }};
+					$(function () {
+						$('#class_accuracy').attr("data-height", $('#text_container').outerHeight())
+						$('#class_accuracy').bootstrapTable({
+							data: classAccuracy
+						});
+					});
+					
+					sortPercentage = function(a, b){
+						a = +a.substring(0, a.length - 1);
+						b = +b.substring(0, b.length - 1);
+						if (a > b) return 1;
+						if (a < b) return -1;
+						return 0;
+					}
+				{% endif %}
+				
+			{% else %}
+				checkLast = function(id){
+					if($('.read_checkbox:checked').length <=1)
+					{
+						$('.read_checkbox:checked').prop('disabled', true);
+						$('#hidden_'+$('.read_checkbox:checked').attr('id')).prop('disabled', false);
+					}
+					else
+					{
+						$('#hidden_'+$('.read_checkbox:disabled').attr('id')).prop('disabled', true);
+						$('.read_checkbox:disabled').prop('disabled', false);
+					}
+				}
+			{% endif %}
+		</script>	
+	</body>
+</html>

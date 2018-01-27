@@ -1,0 +1,31 @@
+{% extends "gui/header.html" %}
+{% load staticfiles%}
+
+{% block content %}
+  <div>
+	<div class="container" style="padding-top: 5%;">
+		<div class="row">
+			<div class="card col-lg-5 col-md-5 col-sm-12 col-xs-12">
+			  <img class="card-img-top" src="{% static 'img/train.jpg' %}" alt="Training document">
+			  <div class="card-body">
+				<h4 class="card-title">Training document</h4>
+				<p class="card-text">
+				<a href="{% static 'download/train.pdf' %}" class="btn btn-primary" download>Download</a>
+			  </div>
+			</div>
+			
+			<div class="col-lg-2 col-md-2 col-sm-0 col-xs-0"></div>
+			
+			<div class="card col-lg-5 col-md-5 col-sm-12 col-xs-12">
+			  <img class="card-img-top" src="{% static 'img/test.jpg' %}" alt="Testing document">
+			  <div class="card-body">
+				<h4 class="card-title">Testing document</h4>
+				<p class="card-text">
+				<a href="{% static 'download/test.pdf' %}" class="btn btn-primary" download>Download</a>
+			  </div>
+			</div>
+		</div>
+	</div>
+  </div>
+{% endblock %}
+		

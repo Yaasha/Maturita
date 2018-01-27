@@ -1,0 +1,94 @@
+{% extends "gui/header.html" %}
+{% load staticfiles %}
+
+{% block content %}	  
+  <div>
+	{% if read_data %}
+		<div class="container-fluid row" style="margin-top:5%;">
+			<div class="col-xl-4 col-lg-1 col-md-1 col-sm-0 col-xs-0"></div>
+			<div id="text_container" class=" card col-xl-auto col-lg-auto col-md-auto col-sm-12 col-xs-12"  style="padding: 25px;">
+				<div style="margin: auto;">
+					{% for line in read_data %}
+						<div>
+							{% for ch in line %}<span style="white-space: pre; cursor: pointer;" tabindex="0" onclick="showPopover(event, {{ forloop.parentloop.counter0 }}, {{ forloop.counter0 }})" id="read_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">{{ch.0.0.0}}</span>{% endfor %}
+						</div>
+					{% endfor %}
+				</div>
+				<div style="margin: auto;">
+					{% if total_acc %}
+						<hr style="height:1px; border:none; color:#999; background-color:#999;">
+						{% if uppercase_acc %}
+							<h6>Uppercase data loss: {{uppercase_loss}}</h6>
+							<h6>Uppercase data accuracy: {{uppercase_acc}}</h6>
+							<br>
+						{% endif %}
+						{% if lowercase_acc %}
+							<h6>Lowercase data loss: {{lowercase_loss}}</h6>
+							<h6>Lowercase data accuracy: {{lowercase_acc}}</h6>
+							<br>
+						{% endif %}
+						{% if digit_acc %}
+							<h6>Digit data loss: {{digit_loss}}</h6>
+							<h6>Digit data accuracy: {{digit_acc}}</h6>
+							<br>
+						{% endif %}
+						<h3>Total loss: {{total_loss}}</h3>
+						<h3>Total accuracy: {{total_acc}}</h3>
+					{% endif %}
+				</div>
+			</div>
+			{% if class_acc %}
+				<div class="col-xl-1 col-lg-1 col-md-0 col-sm-0 col-xs-0"></div>
+				<div class="col-xl-auto col-lg-auto col-md-auto offset-md-1 col-sm-12 col-xs-12">
+					<table id="class_accuracy" class="table" data-height="100%" data-sort-name="char" data-sort-order="asc">
+						<thead>
+							<tr>
+								<th data-field="char"  data-sortable="true">Character</th>
+								<th data-field="acc"  data-sortable="true"  data-sorter="sortPercentage">Accuracy</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+			{% endif %}
+		</div>
+	{% else %}
+		<div class="container" style="margin-top:20%">
+			<div>
+				<h1>Read document</h1>
+				<br><br>
+				<form method="POST" action="" enctype="multipart/form-data">{% csrf_token %}
+					<label for="read_file">Select file to read: </label>
+					<input id="read_file" style="margin-left: 10px;" name="read_file" type="file" class="file" accept=".jpg">
+					<label for="read_type">Select type of the document:</label>
+						<label class="radio-inline" style="margin-left: 10px;"><input type="radio" name="read_type" value="train" checked>Training</label>
+						<label class="radio-inline" style="margin-left: 10px;"><input type="radio" name="read_type" value="test">Testing</label>
+						<br>
+					<div class="checkbox">
+					  <label class="checkbox-inline no_indent" style="padding-right: 5px;">Read:</label>
+					  <label class="checkbox-inline no_indent" style="padding-right: 5px;" for="read_up">
+					  <input class="read_checkbox" type="checkbox" value="1" id="read_up" name="read_up" onchange="checkLast()" checked>
+					  <input class="read_checkbox_hidden" type="hidden" value="1" id="hidden_read_up" name="read_up" onchange="checkLast()" disabled>
+						Uppercase
+					  </label>
+					  
+					  <label class="checkbox-inline no_indent" style="padding-right: 5px;" for="read_low">
+					  <input class="read_checkbox" type="checkbox" value="1" id="read_low" name="read_low" onchange="checkLast()" checked>
+					  <input class="read_checkbox_hidden" type="hidden" value="1" id="hidden_read_low" name="read_low" onchange="checkLast()" disabled>
+						Lowercase
+					  </label>
+					  
+					  <label class="checkbox-inline no_indent" style="padding-right: 5px;" for="read_digit">
+					  <input class="read_checkbox" type="checkbox" value="1" id="read_digit" name="read_digit" onchange="checkLast()" checked>
+					  <input class="read_checkbox_hidden" type="hidden" value="1" id="hidden_read_digit" name="read_digit" onchange="checkLast()" disabled>
+						Digits
+					  </label>
+					</div>
+				    <br>
+					<button id="read" name="read" value="1" type="submit" class="btn btn-primary">Read</button>
+				</form>
+			</div>
+		</div>
+	{% endif %}
+  
+  </div>
+{% endblock %}

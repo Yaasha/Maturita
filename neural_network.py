@@ -1,5 +1,6 @@
 from config import *
 from os import environ
+
 # set keras backend
 environ['KERAS_BACKEND'] = BACKEND
 import dataset
@@ -74,6 +75,9 @@ def create_net(data):
     print("Model visualization...")
     plot_model(model, to_file=visualize_path, show_shapes=True)
 
+    # save the model to file
+    model.save(model_path)
+
     return model
 
 
@@ -132,13 +136,13 @@ def train(model, data, batch_size=BATCH_SIZE, epochs=EPOCHS):
 
     # train the model
     history_dict = model.fit(train_images,
-                        train_labels,
-                        batch_size=batch_size,
-                        epochs=cur_epoch + epochs,
-                        validation_data=(test_images, test_labels),
-                        initial_epoch=cur_epoch,
-                        verbose=2,
-                        callbacks=[score_callback])
+                             train_labels,
+                             batch_size=batch_size,
+                             epochs=cur_epoch + epochs,
+                             validation_data=(test_images, test_labels),
+                             initial_epoch=cur_epoch,
+                             verbose=2,
+                             callbacks=[score_callback])
 
     # save the model to file
     model.save(model_path)
@@ -226,7 +230,6 @@ def predict(model, input, ignore_classes=()):
 
             top_3.append([chr(mapping[class_index]), probability])
 
-
         # add input's prediction to the result
         result.append(top_3)
 
@@ -282,10 +285,9 @@ def evaluate(model, inputs, ignore_classes=()):
 
 
 if __name__ == '__main__':
-    
+
     data = dataset.load()
     model = get_model()
     acc = 0
     while acc < 0.88:
         acc = train(model, data, epochs=1)
-

@@ -3,7 +3,9 @@ import numpy as np
 import neural_network
 import pdf_read
 import dataset
+import pickle
 from config import *
+import base64
 
 model = None
 graph = None
@@ -19,7 +21,7 @@ def server_start():
         graph = tf.get_default_graph()
 
 
-def handle_request(request):
+def handle_request(request, mode=""):
     data = {}
     post = request.POST
     if post:
@@ -35,6 +37,9 @@ def handle_request(request):
 
             if file and file.name.endswith('.jpg'):
                 data.update(read_doc(file, mode, up, low, digit))
+
+    if mode == 'info':
+        data.update(get_info())
 
     return data
 
@@ -208,4 +213,97 @@ def read_doc(file, mode, read_up, read_low, read_digit):
 
     # add reading results
     result.update({'read_data': read_data})
+    return result
+
+
+def insert_index(array):
+    """
+    add first column to 2D array with index
+    :param
+        array: array to which we want to add index
+    :return:
+    array with indexes in in first column
+    """
+    for i in range(len(array)):
+        array[i].insert(0, i)
+    return array
+
+
+def dense_array(array, divide):
+    """
+    delete inconsistent elements of 2D array and reduce its size by creating smaller array
+    :param
+        array: array to dense
+    :param
+        divide: number to divide the array size
+    :return:
+    2D divided array with consistent shape
+    """
+    result = []
+    # get the right size from first element
+    size = len(array[0])
+    print(size)
+    for e in array:
+        # if the element has different size delete it
+        if len(e) != size:
+            i = array.index(e)
+            del array[i]
+    # divide the array into smaller array
+    for i in range(len(array)):
+        if i % divide == 0:
+            result.append(array[i])
+    return result
+
+
+def get_info():
+    """
+    gets project info
+    :return:
+    dictionary with project information
+    """
+
+    # get number of epochs
+    epochs = pickle.load(open(cur_epoch_path, "rb"))
+
+    # get current backend
+    backend = BACKEND
+    # get batch size
+    batch_size = BATCH_SIZE
+
+    # get epoch history
+    epoch_history = pickle.load(open(history_path, "rb"))
+
+    # get training accuracy
+    train_acc = "%.2f" % (epoch_history[-1][1] * 100) + '%'
+    # get testing accuracy
+    val_acc = "%.2f" % (epoch_history[-1][3] * 100) + '%'
+
+    # add index column
+    epoch_history = insert_index(epoch_history)
+    # set headers
+    epoch_history[0] = ['Epoch', 'Training loss', 'Training accuracy', 'Validation loss', 'Validation accuracy']
+
+    # get batch history
+    batch_history = pickle.load(open(history_batch_path, "rb"))
+    # add index column
+    batch_history = insert_index(batch_history)
+    # delete inconsistent elements and dense the array
+    batch_history = dense_array(batch_history, 25)
+    # set headers
+    batch_history[0] = ['Batch', 'Training loss', 'Training accuracy', 'Validation loss', 'Validation accuracy']
+
+    # create result dictionary
+    result = {'cur_epoch': epochs, 'backend': backend, 'train_acc': train_acc, 'val_acc': val_acc,
+              'epoch_history': epoch_history, 'batch_history': batch_history, 'batch_size': batch_size}
+
+    # add image of the cnn model
+    with open(visualize_path, "rb") as image:
+        # get image
+        image = image.read()
+        # encode it to base64
+        image = base64.b64encode(image)
+        # convert it to string
+        image = image.decode('utf-8')
+        result.update({'model_image': image})
+
     return result

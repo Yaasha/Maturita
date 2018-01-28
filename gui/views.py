@@ -22,4 +22,7 @@ def read(request):
     data = backend.handle_request(request)
     return render(request, 'gui/read.html', data)
 
-# Create your views here.
+
+def show_info(request):
+    data = backend.handle_request(request, mode="info")
+    return render(request, 'gui/info.html', data)

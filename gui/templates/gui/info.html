@@ -1,0 +1,98 @@
+{% extends "gui/header.html" %}
+{% load staticfiles%}
+
+{% block content %}
+  <div class="container" style="padding-top: 5%;">
+	<div class="card" style="padding: 10px;">
+		<div class="row">
+			<div class="col-auto">
+				<h3>CNN info</h3>
+				<table>
+					<tr><td><b>Backend: </b></td><td>{{ backend }}</td></tr>
+					<tr><td><b>Current epoch: </b></td><td>{{ cur_epoch }}</td></tr>
+					<tr><td><b>Batch size: </b></td><td>{{ batch_size }}</td></tr>
+				</table>
+			</div>
+			<div class="col-xl-3 col-lg-3 col-md-0 col-sm-0 col-xs-0"></div>
+			<div class="col-auto">
+				<h3>Dataset info</h3>
+				<table>
+					<tr><td><b>Dataset: </b></td><td><a target="blank" href="https://www.nist.gov/itl/iad/image-group/emnist-dataset">EMNIST</a> (byclass)</td></tr>
+					<tr><td><b>Training accuracy: </b></td><td>{{ train_acc }}</td></tr>
+					<tr><td><b>Validation accuracy: </b></td><td>{{ val_acc }}</td></tr>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div style="height: 25px;"></div>
+	<div class="card" style="padding: 10px;"><div id="chart_epoch"></div></div>
+	<div style="height: 25px;"></div>
+	<div class="card" style="padding: 10px;"><div id="chart_batch"></div></div>
+	<div style="height: 25px;"></div>
+	<div class="card col-auto" style="padding: 10px; max-width: 500px;">
+		<h3>CNN layers</h3>
+		<img src="data:image/png;base64,{{ model_image|safe }}" alt="Model layers" style="width: 100%;" >
+	</div>
+	<div style="height: 25px;"></div>
+  </div>
+{% endblock %}
+		
+{% block js %}	
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript">
+	var epoch_history = {{ epoch_history|safe  }};
+	var batch_history = {{ batch_history|safe  }};
+	
+    google.charts.load('current', {packages: ['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      // Define the chart to be drawn.
+      var data_epoch = new google.visualization.arrayToDataTable(epoch_history, false);
+	  var options_epoch = {
+			title: 'Accuracy and loss per epoch',
+			height: 500,
+			hAxis: {
+			  title: 'Epoch'
+			},
+			series: {
+			  0: {targetAxisIndex: 1},
+			  1: {targetAxisIndex: 0},
+			  2: {targetAxisIndex: 1},
+			  3: {targetAxisIndex: 0}
+			},
+			vAxes: {
+			  // Adds titles to each axis.
+			  0: {title: 'Accuracy', format:'#%'},
+			  1: {title: 'Loss'}
+			}
+		};
+      var data_batch = new google.visualization.arrayToDataTable(batch_history, false);
+	  var options_batch = {
+			title: 'Accuracy and loss per batch',
+			height: 500,
+			hAxis: {
+			  title: 'Batch'
+			},
+			series: {
+			  0: {targetAxisIndex: 1},
+			  1: {targetAxisIndex: 0},
+			  2: {targetAxisIndex: 1},
+			  3: {targetAxisIndex: 0}
+			},
+			curveType: 'function',
+			vAxes: {
+			  // Adds titles to each axis.
+			  0: {title: 'Accuracy', format:'#%'},
+			  1: {title: 'Loss'}
+			}
+		};
+
+      // Instantiate and draw the chart.
+      var chart_epoch = new google.visualization.LineChart(document.getElementById('chart_epoch'));
+      chart_epoch.draw(data_epoch, options_epoch);
+      var chart_batch = new google.visualization.LineChart(document.getElementById('chart_batch'));
+      chart_batch.draw(data_batch, options_batch);
+    }
+  </script>
+{% endblock %}

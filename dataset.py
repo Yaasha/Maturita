@@ -20,6 +20,7 @@ def load(file_path=dataset_path):
     # map classes (0 - 62) to ASCII codes for 0-9, A-Z, a-z
     mapping = {char[0]: char[1] for char in dataset_mat['dataset'][0][0][2]}
     # save mapping to a file
+    os.makedirs(os.path.dirname(mapping_path), exist_ok=True)
     pickle.dump(mapping, open(mapping_path, 'wb'))
 
     # load training data

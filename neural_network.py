@@ -73,9 +73,11 @@ def create_net(data):
 
     # save model graph as an image
     print("Model visualization...")
+    os.makedirs(os.path.dirname(visualize_path), exist_ok=True)
     plot_model(model, to_file=visualize_path, show_shapes=True)
 
     # save the model to file
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     model.save(model_path)
 
     return model
@@ -131,8 +133,9 @@ def train(model, data, batch_size=BATCH_SIZE, epochs=EPOCHS):
 
     # callback for saving loss and history each batch
     score_callback = LambdaCallback(on_batch_end=lambda batch, logs: history_batch.append(
-        [logs['loss'], logs['acc']] + list(model.evaluate(get_batch(test_images, batch), get_batch(test_labels, batch),
-                                                          batch_size=BATCH_SIZE, verbose=0))))
+        [float(logs['loss']), float(logs['acc'])] +
+        list(model.evaluate(get_batch(test_images, batch), get_batch(test_labels, batch),
+                            batch_size=BATCH_SIZE, verbose=0))))
 
     # train the model
     history_dict = model.fit(train_images,
@@ -145,6 +148,7 @@ def train(model, data, batch_size=BATCH_SIZE, epochs=EPOCHS):
                              callbacks=[score_callback])
 
     # save the model to file
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     model.save(model_path)
 
     history_dict = history_dict.history
@@ -164,9 +168,12 @@ def train(model, data, batch_size=BATCH_SIZE, epochs=EPOCHS):
         history.append(epoch_history)
 
     # save history and batch history into a file
+    os.makedirs(os.path.dirname(history_path), exist_ok=True)
     pickle.dump(history, open(history_path, 'wb'))
+    os.makedirs(os.path.dirname(history_batch_path), exist_ok=True)
     pickle.dump(history_batch, open(history_batch_path, 'wb'))
     # save current epoch
+    os.makedirs(os.path.dirname(cur_epoch_path), exist_ok=True)
     pickle.dump(cur_epoch + epochs, open(cur_epoch_path, 'wb'))
 
     # get the model`s accuracy

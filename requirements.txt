@@ -18,7 +18,7 @@ PyYAML>=4.2b1
 reportlab==3.4.0
 scipy==1.0.0
 six==1.11.0
-tensorflow==1.5.0
+tensorflow>=1.12.1
 tensorflow-tensorboard==1.5.0
 Theano==1.0.1
 Werkzeug==0.14.1

@@ -15,7 +15,7 @@ pydot==1.2.4
 pyparsing==2.2.0
 pytz==2017.3
 PyYAML>=4.2b1
-reportlab==3.4.0
+reportlab==3.5.55
 scipy==1.0.0
 six==1.11.0
 tensorflow>=1.12.1
